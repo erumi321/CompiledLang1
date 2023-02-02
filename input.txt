@@ -1,0 +1,9 @@
+psh 1 1
+psh 2 1
+psh "" 2
+if 1 < 2
+    psh "hello" 2
+
+prt 2
+c 2
+c 1
