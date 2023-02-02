@@ -1,29 +1,29 @@
 from binary_helper import *
+from stack_manager import StackManager
+from error_handler import ErrorHandler
 
-stacks = {}
+eH = ErrorHandler()
+
+stacks = StackManager(eH)
 
 def ClearStack(args):
-    stacks[args[0]] = {}
-    print("clear")
+    stacks.clear_stack(args[0])
 
 def PushToStack(args):
-    print(args)
-    stacks[args[0]].insert(0, args[1])
-    print("push")
+    stacks.push_stack(args[1], args[0])
 
 def DeleteFromStack(args):
-    stacks[args[0]].pop(args[1])
-    print("delete")
+    stacks.pop_stack(args[0])
 
 def PushStackSizeOntoStack(args):
-    stacks[args[0]].insert(0, len(stacks[args[0]]))
-    print("push")
+    length = stacks.stack_length(args[0])
+    stacks.push_stack(args[0], length)
 
 def PrintFromStack(args):
-    print(stacks[args[0]])
+    print(stacks.get_stack_val(args[0]))
 
 def PrintAsciiFromStack(args):
-    print(ord(stacks[args[0]]))
+    print(ord(stacks.get_stack_val(args[0])))
 
 COMMAND_MAP = {
     "c": ClearStack,
@@ -38,12 +38,8 @@ COMMAND_MAP = {
     # call
 }
 
-
-
 def RunLine(line):
     command = line.split(" ")
-    
-    print(command[1:])
 
     COMMAND_MAP[command[0]](command[1:])
 
@@ -51,9 +47,12 @@ i = open("input.txt", "r", encoding="utf-8")
 
 lines = i.read().split("\n")
 
+line_num = 0
 for line in lines:
+    line_num = line_num + 1
     if len(line) == 0:
         continue
+    ErrorHandler.current_line_num = line_num
     RunLine(line.strip())
 
 f = open("output.cl1", "wb")
