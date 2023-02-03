@@ -17,7 +17,7 @@ def DecodeInt32(inp):
 def EncodeUInt8(val):
     if val < 0 or val > 255:
         return -1
-    return struct.pack("<i", val)
+    return struct.pack("<B", val)
 
 #Encodes a 32-bit uint into binary
 def EncodeUInt32(val):
@@ -42,9 +42,9 @@ def DecodeString(inp):
 
 #Encode a string into bytes
 def EncodeString(inp):
-    b = EncodeUInt32(len(string))
+    b = EncodeUInt32(len(inp))
 
     for c in inp:
-        b.append(EncodeUInt32(ord(c)))
+        b = b + EncodeUInt8(ord(c))
 
     return b

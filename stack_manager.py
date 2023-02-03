@@ -54,3 +54,17 @@ class StackManager:
             return -1
 
         return self.stacks[s_v][0]
+    
+    def get_stack_val_force_type(self, stack_val, force_type):
+        s_v = self.process_stack_val(stack_val)
+        self.check_stack_created(s_v)
+
+        if len(self.stacks[s_v]) == 0:
+            self.errorHandler.ThrowError("Refrencing Stack Value from an Empty Stack")
+            return force_type()
+
+        try:
+            return force_type(self.stacks[s_v][0])
+        except ValueError:
+            self.errorHandler.ThrowError("Forcing String to be an int")
+            return force_type()
