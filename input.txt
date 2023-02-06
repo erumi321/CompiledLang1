@@ -1,2 +1,0 @@
-psh Hello Roan 1
-prt 1

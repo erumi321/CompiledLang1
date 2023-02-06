@@ -1,36 +1,43 @@
 from stack_manager import StackManager
 from error_handler import ErrorHandler
+from binary_helper import *
 
 eH = ErrorHandler()
 
 stacks = StackManager(eH)
 
-def ClearStack(args):
-    stacks.clear_stack(args[0])
+SIGNIFIER_BYTES = {
+    0: "c",
+    1: "psh",
+    2: "del",
+    3: "sze",
+    4: "prt",
+}
 
-def PushToStack(args):
-    p_val = args[0] + " "
-    if len(args) > 2:
-        p_val = ""
-        for x in range(0, len(args) - 1):
-            p_val = p_val + str(args[x]) + " "
-    p_val = p_val[0:-1]
-    stacks.push_stack(args[len(args) - 1], p_val)
+def ClearStack(f):
+    stack_num = DecodeUInt32(f.read(4))
+    stacks.clear_stack(stack_num)
 
-def DeleteFromStack(args):
-    stacks.pop_stack(args[0])
+def PushToStack(f):
+    str_len = DecodeUInt32(f.read(4))
+    str_val = DecodeString(f.read(str_len))
+    stack_num = DecodeUInt32(f.read(4))
 
-def PushStackSizeOntoStack(args):
-    length = stacks.stack_length(args[0])
-    stacks.push_stack(args[0], length)
+    stacks.push_stack(stack_num, str_val)
 
-def PrintFromStack(args):
+def DeleteFromStack(f):
+    stack_num = DecodeUInt32(f.read(4))
+    stacks.pop_stack(stack_num)
+
+def PushStackSizeOntoStack(f):
+    stack_num = DecodeUInt32(f.read(4))
+    length = stacks.stack_length(stack_num)
+    stacks.push_stack(stack_num, length)
+
+def PrintFromStack(f):
     if not ErrorHandler.has_done_error:
-        print(stacks.get_stack_val(args[0])) 
-
-def PrintAsciiFromStack(args):
-    if not ErrorHandler.has_done_error:
-        print(chr(stacks.get_stack_val_force_type(args[0], int)))
+        stack_num = DecodeUInt32(f.read(4))
+        print(stacks.get_stack_val(stack_num))
 
 COMMAND_MAP = {
     "c": ClearStack,
@@ -38,7 +45,6 @@ COMMAND_MAP = {
     "del": DeleteFromStack,
     "sze": PushStackSizeOntoStack,
     "prt": PrintFromStack,
-    "pas": PrintAsciiFromStack
     # if 
     # for
     # fnc
@@ -50,13 +56,9 @@ def RunLine(line):
 
     COMMAND_MAP[command[0]](command[1:])
 
-with open("input.txt", "r", encoding="utf-8") as i:
-    lines = i.read().split("\n")
+with open("output.cl1", "rb") as f:
+    num_commands = DecodeUInt32(f.read(4))
+    for i in range(num_commands):
+        t = DecodeUInt8(f.read(1))
 
-    line_num = 0
-    for line in lines:
-        line_num = line_num + 1
-        if len(line) == 0:
-            continue
-        ErrorHandler.current_line_num = line_num
-        RunLine(line.strip())
+        COMMAND_MAP[SIGNIFIER_BYTES[t]](f)

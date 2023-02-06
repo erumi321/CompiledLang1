@@ -13,40 +13,66 @@ SIGNIFIER_BYTES = {
 
 def encode_clear(args):
     if len(args) != 1:
-        eH.ThrowError("Incorrect number of arguments for clear, found" + str(len(args)) + " expecting 1")
+        eH.ThrowError("Incorrect number of arguments for clear, found " + str(len(args)) + " expected 1")
         return b""
-    return EncodeUInt32(args[1])
+    try:
+        i = int(args[0])
+        return EncodeUInt32(i)
+    except ValueError:
+        eH.ThrowError("Incorrect type of argument for clear, expected int")
+        return b""
 
 def encode_push(args):
     if len(args) < 1:
-        eH.ThrowError("Incorrect number of arguments for push, found" + str(len(args)) + " expecting > 1")
+        eH.ThrowError("Incorrect number of arguments for push, found " + str(len(args)) + " expected > 1")
         return b""
     value = ""
-    for arg in args:
+    for i in range(len(args) - 1):
+        arg = args[i]
         value = value + arg + " "
 
     value = value[0:-1]
     value_bytes = EncodeString(value)
 
-    return value_bytes 
+    try:
+        stack_bytes = EncodeUInt32(int(args[len(args) - 1]))
+        return value_bytes + stack_bytes
+    except ValueError:
+        eH.ThrowError("Incorrect type of argument for stack number for push, expected int")
+        return b""    
 
 def encode_delete(args):
     if len(args) != 1:
-        eH.ThrowError("Incorrect number of arguments for delete, found" + str(len(args)) + " expecting 1")
+        eH.ThrowError("Incorrect number of arguments for delete, found " + str(len(args)) + " expected 1")
         return b""
-    return EncodeUInt32(args[1])
+    try:
+        i = int(args[0])
+        return EncodeUInt32(i)
+    except ValueError:
+        eH.ThrowError("Incorrect type of argument for delete, expected int")
+        return b""
 
 def encode_size(args):
     if len(args) != 1:
-        eH.ThrowError("Incorrect number of arguments for size, found" + str(len(args)) + " expecting 1")
+        eH.ThrowError("Incorrect number of arguments for size, found " + str(len(args)) + " expected 1")
         return b""
-    return EncodeUInt32(args[1])
+    try:
+        i = int(args[0])
+        return EncodeUInt32(i)
+    except ValueError:
+        eH.ThrowError("Incorrect type of argument for size, expected int")
+        return b""
 
 def encode_print(args):
     if len(args) != 1:
-        eH.ThrowError("Incorrect number of arguments for print, found" + str(len(args)) + " expecting 1")
+        eH.ThrowError("Incorrect number of arguments for print, found " + str(len(args)) + " expected 1")
         return b""
-    return EncodeUInt32(args[1])
+    try:
+        i = int(args[0])
+        return EncodeUInt32(i)
+    except ValueError:
+        eH.ThrowError("Incorrect type of argument for clear, expected int")
+        return b""
 
 
 ENCODING_FUNCTIONS = {
@@ -65,9 +91,10 @@ def encode_line(line):
 
     sig_byte = EncodeUInt8(SIGNIFIER_BYTES[command[0]])
 
-    body_bytes = ENCODING_FUNCTIONS[command[0]](command[1:-1])
+    body_bytes = ENCODING_FUNCTIONS[command[0]](command[1:])
 
     print(sig_byte)
+    print(body_bytes)
     return sig_byte + body_bytes
 
 with open("input.txt", "r", encoding="utf-8") as r:
@@ -86,5 +113,6 @@ with open("input.txt", "r", encoding="utf-8") as r:
         ErrorHandler.current_line_num = line_num
         output_bytes = output_bytes + encode_line(line.strip())
     
-    with open("output.cl1", "wb") as w:
-        w.write(output_bytes)
+    if not ErrorHandler.has_done_error:
+        with open("output.cl1", "wb") as w:
+            w.write(output_bytes)

@@ -35,8 +35,7 @@ def EncodeInt32(val):
 def DecodeString(inp):
     output = ""
     for c in inp:
-        i = DecodeUInt8(c)
-        output = output + str(i)
+        output = output + chr(c)
 
     return output
 
