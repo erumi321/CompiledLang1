@@ -9,6 +9,17 @@ SIGNIFIER_BYTES = {
     "del": 2,
     "sze": 3,
     "prt": 4,
+    "mov": 6,
+    "add": 7,
+    "sub": 8,
+    "inc": 9,
+    "dec": 10,
+    "mlt": 11,
+    "div": 12,
+    #not done
+    "eql": 13,
+    "grt": 14,
+    "jmp": 15
 }
 
 def encode_clear(args):
@@ -74,13 +85,133 @@ def encode_print(args):
         eH.ThrowError("Incorrect type of argument for clear, expected int")
         return b""
 
+def encode_move(args):
+    if len(args) != 2:
+        eH.ThrowError("Incorrect number of arguments for move, found " + str(len(args)) + " expected 2")
+        return b""
+    try:
+        stack_1 = int(args[0])
+        stack_2 = int(args[1])
+        return EncodeUInt32(stack_1) + EncodeUInt32(stack_2)
+    except ValueError:
+        eH.ThrowError("Incorrect type of argument for move, expected int")
+        return b""
+
+def encode_add(args):
+    if len(args) != 3:
+        eH.ThrowError("Incorrect number of arguments for add, found " + str(len(args)) + " expected 3")
+        return b""
+    try:
+        stack_1 = int(args[0])
+        stack_2 = int(args[1])
+        target_stack = int(args[2])
+        return EncodeUInt32(stack_1) + EncodeUInt32(stack_2) + EncodeUInt32(target_stack)
+    except ValueError:
+        eH.ThrowError("Incorrect type of argument for add, expected int")
+        return b""
+
+def encode_sub(args):
+    if len(args) != 3:
+        eH.ThrowError("Incorrect number of arguments for sub, found " + str(len(args)) + " expected 3")
+        return b""
+    try:
+        stack_1 = int(args[0])
+        stack_2 = int(args[1])
+        target_stack = int(args[2])
+        return EncodeUInt32(stack_1) + EncodeUInt32(stack_2) + EncodeUInt32(target_stack)
+    except ValueError:
+        eH.ThrowError("Incorrect type of argument for sub, expected int")
+        return b""
+
+def encode_inc(args):
+    if len(args) != 1:
+        eH.ThrowError("Incorrect number of arguments for inc, found " + str(len(args)) + " expected 1")
+        return b""
+    try:
+        stack_1 = int(args[0])
+        return EncodeUInt32(stack_1)
+    except ValueError:
+        eH.ThrowError("Incorrect type of argument for inc, expected int")
+        return b""
+
+def encode_dec(args):
+    if len(args) != 1:
+        eH.ThrowError("Incorrect number of arguments for dec, found " + str(len(args)) + " expected 1")
+        return b""
+    try:
+        stack_1 = int(args[0])
+        return EncodeUInt32(stack_1)
+    except ValueError:
+        eH.ThrowError("Incorrect type of argument for inc, expected int")
+        return b""
+
+def encode_mult(args):
+    if len(args) != 3:
+        eH.ThrowError("Incorrect number of arguments for mlt, found " + str(len(args)) + " expected 3")
+        return b""
+    try:
+        stack_1 = int(args[0])
+        stack_2 = int(args[1])
+        target_stack = int(args[2])
+        return EncodeUInt32(stack_1) + EncodeUInt32(stack_2) + EncodeUInt32(target_stack)
+    except ValueError:
+        eH.ThrowError("Incorrect type of argument for mlt, expected int")
+        return b""
+
+def encode_divide(args):
+    if len(args) != 3:
+        eH.ThrowError("Incorrect number of arguments for div, found " + str(len(args)) + " expected 3")
+        return b""
+    try:
+        stack_1 = int(args[0])
+        stack_2 = int(args[1])
+        target_stack = int(args[2])
+        return EncodeUInt32(stack_1) + EncodeUInt32(stack_2) + EncodeUInt32(target_stack)
+    except ValueError:
+        eH.ThrowError("Incorrect type of argument for div, expected int")
+        return b""
+
+def encode_equal(args):
+    if len(args) != 3:
+        eH.ThrowError("Incorrect number of arguments for eql, found " + str(len(args)) + " expected 3")
+        return b""
+    try:
+        stack_1 = int(args[0])
+        stack_2 = int(args[1])
+        target_stack = int(args[2])
+        return EncodeUInt32(stack_1) + EncodeUInt32(stack_2) + EncodeUInt32(target_stack)
+    except ValueError:
+        eH.ThrowError("Incorrect type of argument for eql, expected int")
+        return b""
+
+def encode_greater(args):
+    if len(args) != 3:
+        eH.ThrowError("Incorrect number of arguments for grt, found " + str(len(args)) + " expected 3")
+        return b""
+    try:
+        stack_1 = int(args[0])
+        stack_2 = int(args[1])
+        target_stack = int(args[2])
+        return EncodeUInt32(stack_1) + EncodeUInt32(stack_2) + EncodeUInt32(target_stack)
+    except ValueError:
+        eH.ThrowError("Incorrect type of argument for grt, expected int")
+        return b""
 
 ENCODING_FUNCTIONS = {
     "c": encode_clear,
     "psh": encode_push,
     "del": encode_delete,
     "sze": encode_size,
-    "prt": encode_print
+    "prt": encode_print,
+    "mov": encode_move,
+    "add": encode_add,
+    "sub": encode_sub,
+    "inc": encode_inc,
+    "dec": encode_dec,
+    "mlt": encode_mult,
+    "div": encode_divide,
+    "eql": encode_equal,
+    "grt": encode_greater
 }
 
 def encode_line(line):
@@ -92,9 +223,6 @@ def encode_line(line):
     sig_byte = EncodeUInt8(SIGNIFIER_BYTES[command[0]])
 
     body_bytes = ENCODING_FUNCTIONS[command[0]](command[1:])
-
-    print(sig_byte)
-    print(body_bytes)
     return sig_byte + body_bytes
 
 with open("input.txt", "r", encoding="utf-8") as r:

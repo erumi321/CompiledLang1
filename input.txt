@@ -1,0 +1,4 @@
+psh 3 1
+psh 1 2
+grt 1 2 3
+prt 3
