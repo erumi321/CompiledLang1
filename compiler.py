@@ -9,6 +9,7 @@ SIGNIFIER_BYTES = {
     "del": 2,
     "sze": 3,
     "prt": 4,
+    "psl": 5,
     "mov": 6,
     "add": 7,
     "sub": 8,
@@ -16,10 +17,10 @@ SIGNIFIER_BYTES = {
     "dec": 10,
     "mlt": 11,
     "div": 12,
-    #not done
     "eql": 13,
     "grt": 14,
-    "jmp": 15
+    "jmp": 15,
+    "not": 16
 }
 
 def encode_clear(args):
@@ -84,7 +85,17 @@ def encode_print(args):
     except ValueError:
         eH.ThrowError("Incorrect type of argument for clear, expected int")
         return b""
-
+    
+def encode_print_same_line(args):
+    if len(args) != 1:
+        eH.ThrowError("Incorrect number of arguments for pls, found " + str(len(args)) + " expected 1")
+        return b""
+    try:
+        i = int(args[0])
+        return EncodeUInt32(i)
+    except ValueError:
+        eH.ThrowError("Incorrect type of argument for pls, expected int")
+        return b""
 def encode_move(args):
     if len(args) != 2:
         eH.ThrowError("Incorrect number of arguments for move, found " + str(len(args)) + " expected 2")
@@ -197,12 +208,35 @@ def encode_greater(args):
         eH.ThrowError("Incorrect type of argument for grt, expected int")
         return b""
 
+def encode_jump(args):
+    if len(args) != 2:
+        eH.ThrowError("Incorrect number of arguments for jmp, found " + str(len(args)) + " expected 2")
+        return b""
+    try:
+        stack_1 = int(args[0])
+        stack_2 = int(args[1])
+        return EncodeUInt32(stack_1) + EncodeUInt32(stack_2)
+    except ValueError:
+        eH.ThrowError("Incorrect type of argument for jmp, expected int")
+        return b""
+
+def encode_not(args):
+    if len(args) != 1:
+        eH.ThrowError("Incorrect number of arguments for not, found " + str(len(args)) + " expected 1")
+        return b""
+    try:
+        stack_1 = int(args[0])
+        return EncodeUInt32(stack_1)
+    except ValueError:
+        eH.ThrowError("Incorrect type of argument for not, expected int")
+        return b""
 ENCODING_FUNCTIONS = {
     "c": encode_clear,
     "psh": encode_push,
     "del": encode_delete,
     "sze": encode_size,
     "prt": encode_print,
+    "psl": encode_print_same_line,
     "mov": encode_move,
     "add": encode_add,
     "sub": encode_sub,
@@ -211,7 +245,9 @@ ENCODING_FUNCTIONS = {
     "mlt": encode_mult,
     "div": encode_divide,
     "eql": encode_equal,
-    "grt": encode_greater
+    "grt": encode_greater,
+    "jmp": encode_jump,
+    "not": encode_not
 }
 
 def encode_line(line):
