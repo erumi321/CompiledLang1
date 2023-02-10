@@ -1,4 +1,13 @@
-psh 3 1
-psh 1 2
-grt 1 2 3
-prt 3
+psh 1 1
+psh 0 10
+psh 10 11
+psh 1 12
+psh 2 20
+psh 7 100
+mlt 1 20 1
+eql 10 11 13
+not 13
+add 10 12 10
+jmp 13 100
+psh 
+prt 1
