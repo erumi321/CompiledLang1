@@ -1,6 +1,6 @@
 psh 1 1
 psh 0 10
-psh 10 11
+psh 9 11
 psh 1 12
 psh 2 20
 mlt 1 20 1
@@ -8,6 +8,6 @@ eql 10 11 13
 not 13
 add 10 12 10
 jmp 13 6
-psh 2 ^ 2048: 200
+psh 2 ^ 10: 200
 psl 200
 prt 1
