@@ -23,6 +23,8 @@ SIGNIFIER_BYTES = {
     "not": 16
 }
 
+line_num_to_bytes=  {}
+
 def encode_clear(args):
     if len(args) != 1:
         eH.ThrowError("Incorrect number of arguments for clear, found " + str(len(args)) + " expected 1")
@@ -214,8 +216,9 @@ def encode_jump(args):
         return b""
     try:
         stack_1 = int(args[0])
-        stack_2 = int(args[1])
-        return EncodeUInt32(stack_1) + EncodeUInt32(stack_2)
+        location = line_num_to_bytes[int(args[1])]
+        print(location)
+        return EncodeUInt32(stack_1) + EncodeUInt32(location)
     except ValueError:
         eH.ThrowError("Incorrect type of argument for jmp, expected int")
         return b""
@@ -275,8 +278,12 @@ with open("input.txt", "r", encoding="utf-8") as r:
         if len(line.strip()) == 0:
             continue
         ErrorHandler.current_line_num = line_num
+        line_num_to_bytes[line_num] = len(output_bytes)
+        print("line:", line_num, ",", len(output_bytes))
         output_bytes = output_bytes + encode_line(line.strip())
-    
+
+
+    output_bytes = output_bytes + b'\x7e\x03\x7e'
     if not ErrorHandler.has_done_error:
         with open("output.cl1", "wb") as w:
             w.write(output_bytes)

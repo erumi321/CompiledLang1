@@ -12,7 +12,7 @@ SIGNIFIER_BYTES = {
     2: "del",
     3: "sze",
     4: "prt",
-    5: "pls",
+    5: "psl",
     6: "mov",
     7: "add",
     8: "sub",
@@ -154,13 +154,12 @@ def GreaterBetweenStacks(f):
 
 def JumpBetweenStacks(f):
     input_stacknum1 = DecodeUInt32(f.read(4))
-    input_stacknum2 = DecodeUInt32(f.read(4))
+    byte_pos = DecodeUInt32(f.read(4))
 
     value_1 = stacks.get_stack_val_force_type(input_stacknum1, int)
-    value_2 = stacks.get_stack_val_force_type(input_stacknum2, int)
 
     if value_1 != 0:
-        return value_2
+        return byte_pos
 
 def NotStack(f):
     target_stack = DecodeUInt32(f.read(4))
@@ -184,7 +183,7 @@ COMMAND_MAP = {
     "del": DeleteFromStack,
     "sze": PushStackSizeOntoStack,
     "prt": PrintFromStack,
-    "pls": PrintSameLineFromStack,
+    "psl": PrintSameLineFromStack,
     "mov": MoveStack,
     "add": AddBetweenStacks,
     "sub": SubBetweenStacks,
@@ -208,18 +207,25 @@ line_pos_dict = {}
 with open("output.cl1", "rb") as f:
     num_commands = DecodeUInt32(f.read(4))
     i = 0
-    while i < num_commands:
-        if not i in line_pos_dict:
-            line_pos_dict[i] = f.tell()
-        else:
-            f.seek(line_pos_dict[i])
-        ErrorHandler.current_line_num = i + 1
-        t = DecodeUInt8(f.read(1))
+    while True:
+        pos = f.tell()
+        next_three = f.read(3)
+        if next_three == b'\x7e\x03\x7e':
+            break
 
-        t = COMMAND_MAP[SIGNIFIER_BYTES[t]](f)
-        if t is not None:
-            i = t - 2
+        f.seek(pos)
+
+        # if not i in line_pos_dict:
+        #     line_pos_dict[i] = f.tell()
+        # else:
+        #     f.seek(line_pos_dict[i])
+        # ErrorHandler.current_line_num = i + 1
+        r = f.read(1)
+        t = DecodeUInt8(r)
+        x = COMMAND_MAP[SIGNIFIER_BYTES[t]](f)
+        if x is not None:
+            f.seek(x)
         
-        i = i + 1
+        # i = i + 1
     
     print("")
