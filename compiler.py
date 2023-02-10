@@ -23,7 +23,11 @@ SIGNIFIER_BYTES = {
     "not": 16
 }
 
+output_bytes = b""
+
 line_num_to_bytes=  {}
+
+queued_jumps = []
 
 def encode_clear(args):
     if len(args) != 1:
@@ -216,9 +220,10 @@ def encode_jump(args):
         return b""
     try:
         stack_1 = int(args[0])
-        location = line_num_to_bytes[int(args[1])]
-        print(location)
-        return EncodeUInt32(stack_1) + EncodeUInt32(location)
+
+        queued_jumps.append([len(output_bytes) + 5, int(args[1])])
+
+        return EncodeUInt32(stack_1) + EncodeUInt32(0)
     except ValueError:
         eH.ThrowError("Incorrect type of argument for jmp, expected int")
         return b""
@@ -266,7 +271,6 @@ def encode_line(line):
 
 with open("input.txt", "r", encoding="utf-8") as r:
     output_bytes = b""
-
     lines = r.read().split("\n")
 
     #num commands bytes
@@ -279,11 +283,14 @@ with open("input.txt", "r", encoding="utf-8") as r:
             continue
         ErrorHandler.current_line_num = line_num
         line_num_to_bytes[line_num] = len(output_bytes)
-        print("line:", line_num, ",", len(output_bytes))
-        output_bytes = output_bytes + encode_line(line.strip())
 
+        output_bytes = output_bytes + encode_line(line.strip())
 
     output_bytes = output_bytes + b'\x7e\x03\x7e'
     if not ErrorHandler.has_done_error:
         with open("output.cl1", "wb") as w:
             w.write(output_bytes)
+
+            for queued_jump in queued_jumps:
+                w.seek(queued_jump[0])
+                w.write(EncodeUInt32(line_num_to_bytes[queued_jump[1]]))

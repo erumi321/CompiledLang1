@@ -219,9 +219,9 @@ with open("output.cl1", "rb") as f:
         #     line_pos_dict[i] = f.tell()
         # else:
         #     f.seek(line_pos_dict[i])
-        # ErrorHandler.current_line_num = i + 1
         r = f.read(1)
         t = DecodeUInt8(r)
+        ErrorHandler.current_line = SIGNIFIER_BYTES[t]
         x = COMMAND_MAP[SIGNIFIER_BYTES[t]](f)
         if x is not None:
             f.seek(x)
