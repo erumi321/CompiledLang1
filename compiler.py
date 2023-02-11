@@ -1,5 +1,6 @@
 from binary_helper import *
 from error_handler import ErrorHandler
+import sys
 
 eH = ErrorHandler()
 
@@ -20,7 +21,8 @@ SIGNIFIER_BYTES = {
     "eql": 13,
     "grt": 14,
     "jmp": 15,
-    "not": 16
+    "not": 16,
+    "lsr": 17
 }
 
 output_bytes = b""
@@ -214,6 +216,19 @@ def encode_greater(args):
         eH.ThrowError("Incorrect type of argument for grt, expected int")
         return b""
 
+def encode_lesser(args):
+    if len(args) != 3:
+        eH.ThrowError("Incorrect number of arguments for lsr, found " + str(len(args)) + " expected 3")
+        return b""
+    try:
+        stack_1 = int(args[0])
+        stack_2 = int(args[1])
+        target_stack = int(args[2])
+        return EncodeUInt32(stack_1) + EncodeUInt32(stack_2) + EncodeUInt32(target_stack)
+    except ValueError:
+        eH.ThrowError("Incorrect type of argument for lsr, expected int")
+        return b""
+
 def encode_jump(args):
     if len(args) != 2:
         eH.ThrowError("Incorrect number of arguments for jmp, found " + str(len(args)) + " expected 2")
@@ -255,7 +270,8 @@ ENCODING_FUNCTIONS = {
     "eql": encode_equal,
     "grt": encode_greater,
     "jmp": encode_jump,
-    "not": encode_not
+    "not": encode_not,
+    "lsr": encode_lesser
 }
 
 def encode_line(line):
@@ -269,7 +285,16 @@ def encode_line(line):
     body_bytes = ENCODING_FUNCTIONS[command[0]](command[1:])
     return sig_byte + body_bytes
 
-with open("input.txt", "r", encoding="utf-8") as r:
+input_file = "input.txt"
+output_file = "output.cl1"
+
+if len(sys.argv) > 1:
+    input_file = str(sys.argv[1]) + ".txt"
+
+if len(sys.argv) > 2:
+    output_file = str(sys.argv[2]) + ".cl1"
+
+with open(input_file, "r", encoding="utf-8") as r:
     output_bytes = b""
     lines = r.read().split("\n")
 
@@ -288,7 +313,7 @@ with open("input.txt", "r", encoding="utf-8") as r:
 
     output_bytes = output_bytes + b'\x7e\x03\x7e'
     if not ErrorHandler.has_done_error:
-        with open("output.cl1", "wb") as w:
+        with open(output_file, "wb") as w:
             w.write(output_bytes)
 
             for queued_jump in queued_jumps:

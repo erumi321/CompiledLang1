@@ -1,7 +1,7 @@
 from stack_manager import StackManager
 from error_handler import ErrorHandler
 from binary_helper import *
-
+import sys
 eH = ErrorHandler()
 
 stacks = StackManager(eH)
@@ -23,7 +23,8 @@ SIGNIFIER_BYTES = {
     13: "eql",
     14: "grt",
     15: "jmp",
-    16: "not"
+    16: "not",
+    17: "lsr"
 }
 
 def ClearStack(f):
@@ -152,6 +153,19 @@ def GreaterBetweenStacks(f):
     else:
         stacks.push_stack(target_stacknum, 0)
 
+def LesserBetweenStacks(f):
+    input_stacknum1 = DecodeUInt32(f.read(4))
+    input_stacknum2 = DecodeUInt32(f.read(4))
+    target_stacknum = DecodeUInt32(f.read(4))
+
+    value_1 = stacks.get_stack_val_force_type(input_stacknum1, int)
+    value_2 = stacks.get_stack_val_force_type(input_stacknum2, int)
+
+    if value_1 < value_2:
+        stacks.push_stack(target_stacknum, 1)
+    else:
+        stacks.push_stack(target_stacknum, 0)
+
 def JumpBetweenStacks(f):
     input_stacknum1 = DecodeUInt32(f.read(4))
     byte_pos = DecodeUInt32(f.read(4))
@@ -194,7 +208,8 @@ COMMAND_MAP = {
     "eql": EqualBetweenStacks,
     "grt": GreaterBetweenStacks,
     "jmp": JumpBetweenStacks,
-    "not": NotStack
+    "not": NotStack,
+    "lsr": LesserBetweenStacks
 }
 
 def RunLine(line):
@@ -204,7 +219,12 @@ def RunLine(line):
 
 line_pos_dict = {}
 
-with open("output.cl1", "rb") as f:
+input_file = "output.cl1"
+
+if len(sys.argv) > 1:
+    input_file = str(sys.argv[1]) + ".cl1"
+
+with open(input_file, "rb") as f:
     num_commands = DecodeUInt32(f.read(4))
     i = 0
     while True:

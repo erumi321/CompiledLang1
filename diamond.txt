@@ -1,0 +1,8 @@
+psh 4 100
+psh 0 1
+
+psh 0 2
+sub 100 1 3
+psh - 200
+psl 200
+inc 2
