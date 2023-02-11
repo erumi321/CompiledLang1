@@ -24,7 +24,9 @@ SIGNIFIER_BYTES = {
     14: "grt",
     15: "jmp",
     16: "not",
-    17: "lsr"
+    17: "lsr",
+    18: "inp",
+    19: "inp_alt"
 }
 
 def ClearStack(f):
@@ -170,10 +172,12 @@ def JumpBetweenStacks(f):
     input_stacknum1 = DecodeUInt32(f.read(4))
     byte_pos = DecodeUInt32(f.read(4))
 
+    line_num = DecodeUInt32(f.read(4))
+
     value_1 = stacks.get_stack_val_force_type(input_stacknum1, int)
 
     if value_1 != 0:
-        return byte_pos
+        return [byte_pos, line_num]
 
 def NotStack(f):
     target_stack = DecodeUInt32(f.read(4))
@@ -190,6 +194,26 @@ def NotStack(f):
 
     stacks.pop_stack(target_stack)
     stacks.push_stack(target_stack, n_val)
+
+def InputToStack(f):
+    target_stack = DecodeUInt32(f.read(4))
+
+    value = input(">")
+
+    stacks.push_stack(target_stack, value)
+
+def PromptInputToStack(f):
+    prompt_stack = DecodeUInt32(f.read(4))
+    target_stack = DecodeUInt32(f.read(4))
+
+    prompt = stacks.get_stack_val(prompt_stack)
+    value = input(str(prompt))
+
+    print('value:', value)
+    print('target:', target_stack)
+
+
+    stacks.push_stack(target_stack, value)
 
 COMMAND_MAP = {
     "c": ClearStack,
@@ -209,7 +233,9 @@ COMMAND_MAP = {
     "grt": GreaterBetweenStacks,
     "jmp": JumpBetweenStacks,
     "not": NotStack,
-    "lsr": LesserBetweenStacks
+    "lsr": LesserBetweenStacks,
+    "inp": InputToStack,
+    "inp_alt": PromptInputToStack
 }
 
 def RunLine(line):
@@ -226,26 +252,25 @@ if len(sys.argv) > 1:
 
 with open(input_file, "rb") as f:
     num_commands = DecodeUInt32(f.read(4))
-    i = 0
+    i = 1
     while True:
         pos = f.tell()
         next_three = f.read(3)
         if next_three == b'\x7e\x03\x7e':
             break
 
+        i = i + 1
+        ErrorHandler.current_line_num = i
+
         f.seek(pos)
 
-        # if not i in line_pos_dict:
-        #     line_pos_dict[i] = f.tell()
-        # else:
-        #     f.seek(line_pos_dict[i])
         r = f.read(1)
         t = DecodeUInt8(r)
         ErrorHandler.current_line = SIGNIFIER_BYTES[t]
         x = COMMAND_MAP[SIGNIFIER_BYTES[t]](f)
         if x is not None:
-            f.seek(x)
+            f.seek(x[0])
+            i = x[1]
         
-        # i = i + 1
     
     print("")

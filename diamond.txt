@@ -1,8 +1,54 @@
-psh 4 100
+psh Diamond Width: 300
+inp 300 0
 psh 0 1
 
-psh 0 2
-sub 100 1 3
-psh - 200
-psl 200
-inc 2
+psh 0 10
+sub 0 1 11
+psh - 12
+psl 12
+inc 10
+lsr 10 11 13
+jmp 13 8
+
+psh 0 10
+psh 2 101
+mlt 1 101 11
+inc 11
+psh * 12
+psl 12
+inc 10
+lsr 10 11 13
+jmp 13 18
+
+prt 12
+inc 1
+lsr 1 0 210
+jmp 210 5
+
+
+psh 2 211
+sub 0 211 1
+psh -1 2
+
+psh 0 10
+sub 0 1 11
+psh - 12
+psl 12
+inc 10
+lsr 10 11 13
+jmp 13 36
+
+psh 0 10
+psh 2 101
+mlt 1 101 11
+inc 11
+psh * 12
+psl 12
+inc 10
+lsr 10 11 13
+jmp 13 46
+
+prt 12
+dec 1
+grt 1 2 210
+jmp 210 33

@@ -22,7 +22,9 @@ SIGNIFIER_BYTES = {
     "grt": 14,
     "jmp": 15,
     "not": 16,
-    "lsr": 17
+    "lsr": 17,
+    "inp": 18,
+    "inp_alt": 19
 }
 
 output_bytes = b""
@@ -238,7 +240,7 @@ def encode_jump(args):
 
         queued_jumps.append([len(output_bytes) + 5, int(args[1])])
 
-        return EncodeUInt32(stack_1) + EncodeUInt32(0)
+        return EncodeUInt32(stack_1) + EncodeUInt32(0) + EncodeUInt32(int(args[1]))
     except ValueError:
         eH.ThrowError("Incorrect type of argument for jmp, expected int")
         return b""
@@ -253,6 +255,25 @@ def encode_not(args):
     except ValueError:
         eH.ThrowError("Incorrect type of argument for not, expected int")
         return b""
+
+def encode_input(args):
+    if len(args) != 1 and len(args) != 2:
+        eH.ThrowError("Incorrect number of arguments for inp, found " + str(len(args)) + " expected 1 or 2")
+        return b""
+    try:
+        target_stack = int(args[0])
+        return EncodeUInt32(target_stack)
+    except ValueError:
+        eH.ThrowError("Incorrect type of argument for inp, expected int")
+
+def encode_input_prompt(args):
+    try:
+        prompt_stack = int(args[0])
+        target_stack = int(args[1])
+        return EncodeUInt32(prompt_stack) + EncodeUInt32(target_stack)
+    except ValueError:
+        eH.ThrowError("Incorrect type of argument for inp, expected int")
+
 ENCODING_FUNCTIONS = {
     "c": encode_clear,
     "psh": encode_push,
@@ -271,7 +292,9 @@ ENCODING_FUNCTIONS = {
     "grt": encode_greater,
     "jmp": encode_jump,
     "not": encode_not,
-    "lsr": encode_lesser
+    "lsr": encode_lesser,
+    "inp": encode_input,
+    "inp_alt": encode_input_prompt
 }
 
 def encode_line(line):
@@ -280,9 +303,15 @@ def encode_line(line):
     if not command[0] in SIGNIFIER_BYTES:
         eH.ThrowError("Incorrect Command")
 
-    sig_byte = EncodeUInt8(SIGNIFIER_BYTES[command[0]])
+    c = command[0]
+    if c == "inp":
+        if len(command) == 3:
+            c = "inp_alt"
+            print("alt")
 
-    body_bytes = ENCODING_FUNCTIONS[command[0]](command[1:])
+    sig_byte = EncodeUInt8(SIGNIFIER_BYTES[c])
+
+    body_bytes = ENCODING_FUNCTIONS[c](command[1:])
     return sig_byte + body_bytes
 
 input_file = "input.txt"
@@ -301,13 +330,13 @@ with open(input_file, "r", encoding="utf-8") as r:
     #num commands bytes
     output_bytes = output_bytes + EncodeUInt32(len(lines))
 
-    line_num = 0
+    line_num = 1
     for line in lines:
         line_num = line_num + 1
         if len(line.strip()) == 0:
             continue
         ErrorHandler.current_line_num = line_num
-        line_num_to_bytes[line_num] = len(output_bytes)
+        line_num_to_bytes[line_num - 1] = len(output_bytes)
 
         output_bytes = output_bytes + encode_line(line.strip())
 
