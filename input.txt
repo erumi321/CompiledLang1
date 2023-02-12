@@ -3,11 +3,12 @@ psh 0 10
 psh 9 11
 psh 1 12
 psh 2 20
+mrk 0
 mlt 1 20 1
 eql 10 11 13
 not 13
 add 10 12 10
-jmp 13 6
+jmp 13 0
 psh 2 ^ 10: 200
 psl 200
 prt 1

@@ -2,53 +2,59 @@ psh Diamond Width: 300
 inp 300 0
 psh 0 1
 
+mrk 3
 psh 0 10
 sub 0 1 11
 psh - 12
+mrk 0
 psl 12
 inc 10
 lsr 10 11 13
-jmp 13 8
+jmp 13 0
 
 psh 0 10
 psh 2 101
 mlt 1 101 11
 inc 11
+mrk 1
 psh * 12
 psl 12
 inc 10
 lsr 10 11 13
-jmp 13 18
+jmp 13 1
 
 prt 12
 inc 1
 lsr 1 0 210
-jmp 210 5
+jmp 210 3
 
 
 psh 2 211
 sub 0 211 1
 psh -1 2
+mrk 6
 
 psh 0 10
 sub 0 1 11
 psh - 12
+mrk 4
 psl 12
 inc 10
 lsr 10 11 13
-jmp 13 36
+jmp 13 4
 
 psh 0 10
 psh 2 101
 mlt 1 101 11
 inc 11
 psh * 12
+mrk 5
 psl 12
 inc 10
 lsr 10 11 13
-jmp 13 46
+jmp 13 5
 
 prt 12
 dec 1
 grt 1 2 210
-jmp 210 33
+jmp 210 6

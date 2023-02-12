@@ -32,6 +32,8 @@ output_bytes = b""
 line_num_to_bytes=  {}
 
 queued_jumps = []
+mark_locations = {}
+line_num = 1
 
 def encode_clear(args):
     if len(args) != 1:
@@ -240,9 +242,23 @@ def encode_jump(args):
 
         queued_jumps.append([len(output_bytes) + 5, int(args[1])])
 
-        return EncodeUInt32(stack_1) + EncodeUInt32(0) + EncodeUInt32(int(args[1]))
+        return EncodeUInt32(stack_1) + EncodeUInt32(0) + EncodeUInt32(0)
     except ValueError:
         eH.ThrowError("Incorrect type of argument for jmp, expected int")
+        return b""
+
+def encode_mark(args):
+    if len(args) != 1:
+        eH.ThrowError("Incorrect number of arguments for mrk, found " + str(len(args)) + " expected 1")
+        return b""
+    try:
+        value = int(args[0])
+
+        mark_locations[value] = [len(output_bytes), line_num]
+
+        return b""
+    except ValueError:
+        eH.ThrowError("Incorrect type of argument for mrk, expected int")
         return b""
 
 def encode_not(args):
@@ -294,13 +310,14 @@ ENCODING_FUNCTIONS = {
     "not": encode_not,
     "lsr": encode_lesser,
     "inp": encode_input,
-    "inp_alt": encode_input_prompt
+    "inp_alt": encode_input_prompt,
+    "mrk": encode_mark
 }
 
 def encode_line(line):
     command = line.split(" ")
 
-    if not command[0] in SIGNIFIER_BYTES:
+    if not command[0] in SIGNIFIER_BYTES and command[0] != "mrk":
         eH.ThrowError("Incorrect Command")
 
     c = command[0]
@@ -309,10 +326,13 @@ def encode_line(line):
             c = "inp_alt"
             print("alt")
 
-    sig_byte = EncodeUInt8(SIGNIFIER_BYTES[c])
-
     body_bytes = ENCODING_FUNCTIONS[c](command[1:])
-    return sig_byte + body_bytes
+
+    if command[0] != "mrk":
+        sig_byte = EncodeUInt8(SIGNIFIER_BYTES[c])
+        return sig_byte + body_bytes
+    else:
+        return b""
 
 input_file = "input.txt"
 output_file = "output.cl1"
@@ -330,7 +350,6 @@ with open(input_file, "r", encoding="utf-8") as r:
     #num commands bytes
     output_bytes = output_bytes + EncodeUInt32(len(lines))
 
-    line_num = 1
     for line in lines:
         line_num = line_num + 1
         if len(line.strip()) == 0:
@@ -347,4 +366,9 @@ with open(input_file, "r", encoding="utf-8") as r:
 
             for queued_jump in queued_jumps:
                 w.seek(queued_jump[0])
-                w.write(EncodeUInt32(line_num_to_bytes[queued_jump[1]]))
+
+                location = mark_locations[queued_jump[1]][0]
+                line_num = mark_locations[queued_jump[1]][1]
+
+                w.write(EncodeUInt32(location))
+                w.write(EncodeUInt32(line_num))
