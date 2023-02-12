@@ -395,6 +395,8 @@ def encode_jump(args):
 
     try:
         target = int(args[1])
+        if not target in mark_locations:
+            eH.ThrowError("Trying to jump to unmarked location ", target)
         queued_jumps.append([len(output_bytes) + 5, target])
     except ValueError:
         eH.ThrowError("Incorrect type for argument 2 of jmp, expected int")
@@ -549,6 +551,20 @@ with open(input_file, "r", encoding="utf-8") as r:
     #num commands bytes
     output_bytes = output_bytes + EncodeUInt32(len(lines))
 
+    for line in lines:
+        line_num = line_num + 1
+        if len(line.strip()) == 0:
+            continue
+        ErrorHandler.current_line_num = line_num
+        command = line.split(" ")
+
+        if command[0] == "mrk":
+            if len(command) == 2:
+                mark_locations[command[1]] = 0
+            else:
+                eH.ThrowError("Incorrect number of arguments for mrk, found ", len(command - 1), "expected 1")
+
+    line_num = 0
     for line in lines:
         line_num = line_num + 1
         if len(line.strip()) == 0:
