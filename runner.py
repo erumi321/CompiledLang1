@@ -75,7 +75,7 @@ def AddBetweenStacks(f):
     input_stacknum2 = DecodeUInt32(f.read(4))
     target_stacknum = DecodeUInt32(f.read(4))
 
-    val = stacks.get_stack_val_force_type(input_stacknum1, int) + stacks.get_stack_val_force_type(input_stacknum2, int)
+    val = stacks.get_stack_val_force_type(input_stacknum1, float) + stacks.get_stack_val_force_type(input_stacknum2, float)
 
     stacks.push_stack(target_stacknum, val)
 
@@ -84,14 +84,14 @@ def SubBetweenStacks(f):
     input_stacknum2 = DecodeUInt32(f.read(4))
     target_stacknum = DecodeUInt32(f.read(4))
 
-    val = stacks.get_stack_val_force_type(input_stacknum1, int) - stacks.get_stack_val_force_type(input_stacknum2, int)
+    val = stacks.get_stack_val_force_type(input_stacknum1, float) - stacks.get_stack_val_force_type(input_stacknum2, float)
 
     stacks.push_stack(target_stacknum, val)
 
 def IncreaseStack(f):
     stack_num = DecodeUInt32(f.read(4))
 
-    val = stacks.get_stack_val_force_type(stack_num, int) + 1
+    val = stacks.get_stack_val_force_type(stack_num, float) + 1
 
     stacks.pop_stack(stack_num)
     stacks.push_stack(stack_num, val)
@@ -99,7 +99,7 @@ def IncreaseStack(f):
 def DecreaseStack(f):
     stack_num = DecodeUInt32(f.read(4))
 
-    val = stacks.get_stack_val_force_type(stack_num, int) - 1
+    val = stacks.get_stack_val_force_type(stack_num, float) - 1
 
     stacks.pop_stack(stack_num)
     stacks.push_stack(stack_num, val)
@@ -109,7 +109,7 @@ def MultiplyBetweenStacks(f):
     input_stacknum2 = DecodeUInt32(f.read(4))
     target_stacknum = DecodeUInt32(f.read(4))
 
-    val = stacks.get_stack_val_force_type(input_stacknum1, int) * stacks.get_stack_val_force_type(input_stacknum2, int)
+    val = stacks.get_stack_val_force_type(input_stacknum1, float) * stacks.get_stack_val_force_type(input_stacknum2, float)
 
     stacks.push_stack(target_stacknum, val)
 
@@ -118,7 +118,15 @@ def DivideBetweenStacks(f):
     input_stacknum2 = DecodeUInt32(f.read(4))
     target_stacknum = DecodeUInt32(f.read(4))
 
-    val = stacks.get_stack_val_force_type(input_stacknum1, int) // stacks.get_stack_val_force_type(input_stacknum2, int)
+    val_1 = stacks.get_stack_val_force_type(input_stacknum1, float)
+    val_2 = stacks.get_stack_val_force_type(input_stacknum2, float)
+
+    val = val_1
+
+    if val_2 == 0:
+        eH.ThrowError("Divide by zero")
+    else:
+        val = val_1 / val_2
 
     stacks.push_stack(target_stacknum, val)
 
@@ -149,8 +157,8 @@ def GreaterBetweenStacks(f):
     input_stacknum2 = DecodeUInt32(f.read(4))
     target_stacknum = DecodeUInt32(f.read(4))
 
-    value_1 = stacks.get_stack_val_force_type(input_stacknum1, int)
-    value_2 = stacks.get_stack_val_force_type(input_stacknum2, int)
+    value_1 = stacks.get_stack_val_force_type(input_stacknum1, float)
+    value_2 = stacks.get_stack_val_force_type(input_stacknum2, float)
 
     if value_1 > value_2:
         stacks.push_stack(target_stacknum, 1)
@@ -162,8 +170,8 @@ def LesserBetweenStacks(f):
     input_stacknum2 = DecodeUInt32(f.read(4))
     target_stacknum = DecodeUInt32(f.read(4))
 
-    value_1 = stacks.get_stack_val_force_type(input_stacknum1, int)
-    value_2 = stacks.get_stack_val_force_type(input_stacknum2, int)
+    value_1 = stacks.get_stack_val_force_type(input_stacknum1, float)
+    value_2 = stacks.get_stack_val_force_type(input_stacknum2, float)
 
     if value_1 < value_2:
         stacks.push_stack(target_stacknum, 1)
@@ -176,7 +184,7 @@ def JumpBetweenStacks(f):
 
     line_num = DecodeUInt32(f.read(4))
 
-    value_1 = stacks.get_stack_val_force_type(input_stacknum1, int)
+    value_1 = stacks.get_stack_val_force_type(input_stacknum1, float)
 
     if value_1 != 0:
         return [byte_pos, line_num]
@@ -184,7 +192,7 @@ def JumpBetweenStacks(f):
 def NotStack(f):
     target_stack = DecodeUInt32(f.read(4))
 
-    val = stacks.get_stack_val_force_type(target_stack, int)
+    val = stacks.get_stack_val_force_type(target_stack, float)
 
     if val != 0 and val != 1:
         eH.ThrowError("Incorrect operation for Not, cannot swap a non-boolean value (1 or 0)")
