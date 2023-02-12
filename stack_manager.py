@@ -25,6 +25,10 @@ class StackManager:
         if not val in self.stacks:
             self.stacks[val] = []
 
+    def bool_stack_exists(self, val):
+        s_v = self.process_stack_val(val)
+        return s_v in self.stacks
+
     def clear_stack(self, stack_val):
         s_v = self.process_stack_val(stack_val)
         self.check_stack_created(s_v)
@@ -66,5 +70,4 @@ class StackManager:
         try:
             return force_type(self.stacks[s_v][len(self.stacks[s_v]) - 1])
         except ValueError:
-            self.errorHandler.ThrowError("Forcing String to be an int")
-            return force_type()
+            return ValueError

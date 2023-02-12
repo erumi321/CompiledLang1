@@ -26,7 +26,9 @@ SIGNIFIER_BYTES = {
     16: "not",
     17: "lsr",
     18: "inp",
-    19: "inp_alt"
+    19: "inp_alt",
+    20: "inn",
+    21: "inn_alt"
 }
 
 def ClearStack(f):
@@ -215,6 +217,35 @@ def PromptInputToStack(f):
 
     stacks.push_stack(target_stack, value)
 
+def InputNumberToStack(f):
+    target_stack = DecodeUInt32(f.read(4))
+
+    while True:
+        try:
+            value = value = input("(Number Input)>")
+            value = int(value)
+            break
+        except ValueError:
+            print("Incorrect - this requires a number, please try again: ")
+    
+    stacks.push_stack(target_stack, value)
+
+def PromptInputNumberToStack(f):
+    prompt_stack = DecodeUInt32(f.read(4))
+    target_stack = DecodeUInt32(f.read(4))
+
+    prompt = stacks.get_stack_val(prompt_stack)
+    
+    while True:
+        try:
+            value = input("(Number Input) " + str(prompt) + " ")
+            value = int(value)
+            break
+        except ValueError:
+            print("Incorrect - this requires a number, please try again: ")
+
+    stacks.push_stack(target_stack, value)
+
 COMMAND_MAP = {
     "c": ClearStack,
     "psh": PushToStack,
@@ -235,7 +266,9 @@ COMMAND_MAP = {
     "not": NotStack,
     "lsr": LesserBetweenStacks,
     "inp": InputToStack,
-    "inp_alt": PromptInputToStack
+    "inp_alt": PromptInputToStack,
+    "inn": InputNumberToStack,
+    "inn_alt": PromptInputNumberToStack,
 }
 
 def RunLine(line):
