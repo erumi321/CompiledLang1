@@ -5,7 +5,7 @@ psh 0 1
 mrk 3
 psh 0 10
 sub 0 1 11
-psh - 12
+psh $. 12
 mrk 0
 psl 12
 inc 10
@@ -16,13 +16,14 @@ psh 0 10
 psh 2 101
 mlt 1 101 11
 inc 11
-mrk 1
 psh * 12
+mrk 1
 psl 12
 inc 10
 lsr 10 11 13
 jmp 13 1
 
+psh $. 12
 prt 12
 inc 1
 lsr 1 0 210
@@ -36,7 +37,7 @@ mrk 6
 
 psh 0 10
 sub 0 1 11
-psh - 12
+psh $. 12
 mrk 4
 psl 12
 inc 10
@@ -54,6 +55,7 @@ inc 10
 lsr 10 11 13
 jmp 13 5
 
+psh $. 12
 prt 12
 dec 1
 grt 1 2 210

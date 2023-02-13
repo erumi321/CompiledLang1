@@ -27,7 +27,8 @@ SIGNIFIER_BYTES = {
     "inp": 18,
     "inp_alt": 19,
     "inn": 20,
-    "inn_alt": 21
+    "inn_alt": 21,
+    "slp": 22
 }
 
 output_bytes = b""
@@ -374,11 +375,6 @@ def encode_lesser(args):
         eH.ThrowError("Incorrect type for argument 3 of lsr, expected int")
     return EncodeUInt32(stack_1) + EncodeUInt32(stack_2) + EncodeUInt32(target_stack)
 
-
-"""
-TODO: Cache all the markers to see if marker x exists 
-"""
-
 def encode_jump(args):
     if len(args) != 2:
         eH.ThrowError("Incorrect number of arguments for jmp, found " + str(len(args)) + " expected 2")
@@ -488,6 +484,22 @@ def encode_input_number_prompt(args):
         eH.ThrowError("Incorrect type for argument 2 of inp, expected int")
     return EncodeUInt32(prompt_stack) + EncodeUInt32(target_stack)
 
+def encode_sleep(args):
+    if len(args) != 1:
+        eH.ThrowError("Incorrect number of arguments for slp, found " + str(len(args)) + " expected 1")
+
+    stack_1 = 0
+    try:
+        stack_1 = int(args[0])
+        if not stacks.bool_stack_exists(stack_1) or stacks.stack_length(stack_1) == 0:
+            eH.ThrowError("Trying to read a sleep value from an empty stack (", stack_1, ")")
+        if not stacks.get_stack_val_force_type(stack_1, float):
+            eH.ThrowError("Trying to read a non-number for sleep from stack ", stack_1)
+    except ValueError:
+        eH.ThrowError("Incorrect type for argument 1 of slp, expected int")
+
+    return EncodeUInt32(stack_1)
+
 ENCODING_FUNCTIONS = {
     "c": encode_clear,
     "psh": encode_push,
@@ -511,7 +523,8 @@ ENCODING_FUNCTIONS = {
     "inp_alt": encode_input_prompt,
     "inn": encode_input_number,
     "inn_alt": encode_input_number_prompt,
-    "mrk": encode_mark
+    "mrk": encode_mark,
+    "slp": encode_sleep
 }
 
 def encode_line(line):

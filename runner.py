@@ -2,6 +2,8 @@ from stack_manager import StackManager
 from error_handler import ErrorHandler
 from binary_helper import *
 import sys
+import time
+
 eH = ErrorHandler()
 
 stacks = StackManager(eH)
@@ -28,7 +30,8 @@ SIGNIFIER_BYTES = {
     18: "inp",
     19: "inp_alt",
     20: "inn",
-    21: "inn_alt"
+    21: "inn_alt",
+    22: "slp"
 }
 
 def ClearStack(f):
@@ -60,6 +63,7 @@ def PrintSameLineFromStack(f):
     if not ErrorHandler.has_done_error:
         stack_num = DecodeUInt32(f.read(4))
         print(stacks.get_stack_val(stack_num), end="")
+        sys.stdout.flush()
 
 def MoveStack(f):
     input_stacknum = DecodeUInt32(f.read(4))
@@ -254,6 +258,13 @@ def PromptInputNumberToStack(f):
 
     stacks.push_stack(target_stack, value)
 
+def SleepFromStack(f):
+    target_stack = DecodeUInt32(f.read(4))
+
+    val = stacks.get_stack_val_force_type(target_stack, float)
+
+    time.sleep(val / 1000)
+
 COMMAND_MAP = {
     "c": ClearStack,
     "psh": PushToStack,
@@ -277,6 +288,7 @@ COMMAND_MAP = {
     "inp_alt": PromptInputToStack,
     "inn": InputNumberToStack,
     "inn_alt": PromptInputNumberToStack,
+    "slp": SleepFromStack
 }
 
 def RunLine(line):
@@ -290,6 +302,7 @@ input_file = "output.cl1"
 
 if len(sys.argv) > 1:
     input_file = str(sys.argv[1]) + ".cl1"
+
 
 with open(input_file, "rb") as f:
     num_commands = DecodeUInt32(f.read(4))

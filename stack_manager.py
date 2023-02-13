@@ -56,8 +56,13 @@ class StackManager:
         if len(self.stacks[s_v]) == 0:
             self.errorHandler.ThrowError("Refrencing Stack Value from an Empty Stack")
             return -1
+        
+        val = self.stacks[s_v][len(self.stacks[s_v]) - 1]
 
-        return self.stacks[s_v][len(self.stacks[s_v]) - 1]
+        if val == "$.":
+            val = " "
+
+        return val
     
     def get_stack_val_force_type(self, stack_val, force_type):
         s_v = self.process_stack_val(stack_val)
