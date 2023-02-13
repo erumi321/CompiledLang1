@@ -1,5 +1,5 @@
 psh Diamond Width: 300
-inn 300 0
+nin 300 0
 psh 0 1
 
 mrk 3

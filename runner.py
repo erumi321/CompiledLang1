@@ -9,7 +9,7 @@ eH = ErrorHandler()
 stacks = StackManager(eH)
 
 SIGNIFIER_BYTES = {
-    0: "c",
+    0: "clr",
     1: "psh",
     2: "del",
     3: "sze",
@@ -29,8 +29,8 @@ SIGNIFIER_BYTES = {
     17: "lsr",
     18: "inp",
     19: "inp_alt",
-    20: "inn",
-    21: "inn_alt",
+    20: "nin",
+    21: "nin_alt",
     22: "slp"
 }
 
@@ -182,7 +182,7 @@ def LesserBetweenStacks(f):
     else:
         stacks.push_stack(target_stacknum, 0)
 
-def JumpBetweenStacks(f):
+def JumpLine(f):
     input_stacknum1 = DecodeUInt32(f.read(4))
     byte_pos = DecodeUInt32(f.read(4))
 
@@ -234,8 +234,8 @@ def InputNumberToStack(f):
 
     while True:
         try:
-            value = value = input("(Number Input)>")
-            value = int(value)
+            value = value = input("(Number Input) >")
+            value = float(value)
             break
         except ValueError:
             print("Incorrect - this requires a number, please try again: ")
@@ -251,7 +251,7 @@ def PromptInputNumberToStack(f):
     while True:
         try:
             value = input("(Number Input) " + str(prompt) + " ")
-            value = int(value)
+            value = float(value)
             break
         except ValueError:
             print("Incorrect - this requires a number, please try again: ")
@@ -266,7 +266,7 @@ def SleepFromStack(f):
     time.sleep(val / 1000)
 
 COMMAND_MAP = {
-    "c": ClearStack,
+    "clr": ClearStack,
     "psh": PushToStack,
     "del": DeleteFromStack,
     "sze": PushStackSizeOntoStack,
@@ -281,13 +281,13 @@ COMMAND_MAP = {
     "div": DivideBetweenStacks,
     "eql": EqualBetweenStacks,
     "grt": GreaterBetweenStacks,
-    "jmp": JumpBetweenStacks,
+    "jmp": JumpLine,
     "not": NotStack,
     "lsr": LesserBetweenStacks,
     "inp": InputToStack,
     "inp_alt": PromptInputToStack,
-    "inn": InputNumberToStack,
-    "inn_alt": PromptInputNumberToStack,
+    "nin": InputNumberToStack,
+    "nin_alt": PromptInputNumberToStack,
     "slp": SleepFromStack
 }
 

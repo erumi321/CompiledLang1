@@ -6,7 +6,7 @@ import sys
 eH = ErrorHandler()
 
 SIGNIFIER_BYTES = {
-    "c": 0,
+    "clr": 0,
     "psh": 1,
     "del": 2,
     "sze": 3,
@@ -26,8 +26,8 @@ SIGNIFIER_BYTES = {
     "lsr": 17,
     "inp": 18,
     "inp_alt": 19,
-    "inn": 20,
-    "inn_alt": 21,
+    "nin": 20,
+    "nin_alt": 21,
     "slp": 22
 }
 
@@ -521,8 +521,8 @@ ENCODING_FUNCTIONS = {
     "lsr": encode_lesser,
     "inp": encode_input,
     "inp_alt": encode_input_prompt,
-    "inn": encode_input_number,
-    "inn_alt": encode_input_number_prompt,
+    "nin": encode_input_number,
+    "nin_alt": encode_input_number_prompt,
     "mrk": encode_mark,
     "slp": encode_sleep
 }
@@ -537,9 +537,9 @@ def encode_line(line):
     if c == "inp":
         if len(command) == 3:
             c = "inp_alt"
-    elif c == "inn":
+    elif c == "nin":
         if len(command) == 3:
-            c = "inn_alt"
+            c = "nin_alt"
     body_bytes = ENCODING_FUNCTIONS[c](command[1:])
 
     if command[0] != "mrk":
