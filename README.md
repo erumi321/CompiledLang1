@@ -177,6 +177,18 @@ lsr 0 1 2
 jmp 2 0
 ```
 
+# Special Characters
+* <code>$.</code> If the string cosnsits only of $. then it will be substituted for a space ex. (prints <code>a $.a</code>) 
+  ```
+  psh $. 0
+  psh $.a 1
+  psh a 2
+  psl 2
+  psl 0
+  psl 1
+  ```
+  
+
 # Compiling and Running
 The compiler and runner run on python.
 The compiler takes 2 args input and output, the relative file paths of the locations to read the uncompiled code and write the compiled code to
