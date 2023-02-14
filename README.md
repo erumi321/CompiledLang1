@@ -190,6 +190,10 @@ lsr 0 1 2
 jmp 2 0
 ```
 
+# Comments
+
+If you put <code>|</code> at the beginning of a line, the line is a comment and will not be read by the compiler. To work correctly there must be a space between the signle pipe and the rest of the comment so <code>| Comment</code> is valid but <code>|Comment</code> is not.
+
 # Special Characters
 * <code>$.</code> If the string cosnsits only of $. then it will be substituted for a space ex. (prints <code>a $.a</code>) 
   ```
