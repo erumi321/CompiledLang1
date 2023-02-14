@@ -150,6 +150,19 @@ If nin is overloaded with 2 arguments, it will instead offer a prompt of the top
 Will read the top value off of input_stack and then wait that many milliseconds
 
   
+### rnd <input_stack_1> <input_stack_2> <target_stack> (random)
+
+Gets a random integer number in the range of [top val of input_stack_1, top val of input_stack_2] and pushes that number on top of target_stack
+
+### and <input_stack_1> <input_stack_2> <target_stack> (and)
+
+If the top value of input_stack_1 is truthy (not 0) and the top value of input_stack_2 is truthy (not 0) then push 1 on top of target_stack, else push 0
+
+### bor <input_stack_1> <input_stack_2> <target_stack> (binary or)
+
+If the top value of input_stack_1 or the top value of input_stack_2 is truthy (not 0) then push 1 to the top of target_stack, otherwise push 0
+
+
 
 ### jmp <input_stack>  <target> (jump)
 

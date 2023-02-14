@@ -3,6 +3,7 @@ from error_handler import ErrorHandler
 from binary_helper import *
 import sys
 import time
+import random
 
 eH = ErrorHandler()
 
@@ -31,7 +32,10 @@ SIGNIFIER_BYTES = {
     19: "inp_alt",
     20: "nin",
     21: "nin_alt",
-    22: "slp"
+    22: "slp",
+    23: "rnd",
+    24: "and",
+    25: "bor"
 }
 
 def ClearStack(f):
@@ -265,6 +269,46 @@ def SleepFromStack(f):
 
     time.sleep(val / 1000)
 
+def RandomToStack(f):
+    stack_1 = DecodeUInt32(f.read(4))
+    stack_2 = DecodeUInt32(f.read(4))
+    target_stack = DecodeUInt32(f.read(4))
+
+    min = stacks.get_stack_val_force_type(stack_1, int)
+    max = stacks.get_stack_val_force_type(stack_2, int)
+
+    rand_val = random.randint(min, max)
+
+    stacks.push_stack(target_stack, rand_val)
+
+def AndToStack(f):
+    input_stacknum1 = DecodeUInt32(f.read(4))
+    input_stacknum2 = DecodeUInt32(f.read(4))
+    target_stacknum = DecodeUInt32(f.read(4))
+
+    value_1 = stacks.get_stack_val_force_type(input_stacknum1, float)
+    value_2 = stacks.get_stack_val_force_type(input_stacknum2, float)
+
+    if value_1 == 0 or value_2 == 0:
+        stacks.push_stack(target_stacknum, 0)
+    elif value_1 != 0 and value_2 != 0:
+        stacks.push_stack(target_stacknum, 1)
+    
+def OrToStack(f):
+    input_stacknum1 = DecodeUInt32(f.read(4))
+    input_stacknum2 = DecodeUInt32(f.read(4))
+    target_stacknum = DecodeUInt32(f.read(4))
+
+    value_1 = stacks.get_stack_val_force_type(input_stacknum1, float)
+    value_2 = stacks.get_stack_val_force_type(input_stacknum2, float)
+
+    if value_1 != 0 or value_2 != 0:
+        stacks.push_stack(target_stacknum, 1)
+    else:
+        stacks.push_stack(target_stacknum, 0)
+
+
+
 COMMAND_MAP = {
     "clr": ClearStack,
     "psh": PushToStack,
@@ -288,7 +332,10 @@ COMMAND_MAP = {
     "inp_alt": PromptInputToStack,
     "nin": InputNumberToStack,
     "nin_alt": PromptInputNumberToStack,
-    "slp": SleepFromStack
+    "slp": SleepFromStack,
+    "rnd": RandomToStack,
+    "and": AndToStack,
+    "bor": OrToStack
 }
 
 def RunLine(line):

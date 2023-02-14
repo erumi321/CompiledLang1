@@ -28,7 +28,12 @@ SIGNIFIER_BYTES = {
     "inp_alt": 19,
     "nin": 20,
     "nin_alt": 21,
-    "slp": 22
+    "slp": 22,
+    "rnd": 23,
+    "and": 24,
+    "bor": 25,
+    "mrk": -1,
+    "|": -1
 }
 
 output_bytes = b""
@@ -500,6 +505,100 @@ def encode_sleep(args):
 
     return EncodeUInt32(stack_1)
 
+def encode_rand(args):
+    if len(args) != 3:
+        eH.ThrowError("Incorrect number of arguments for rnd, found " + str(len(args)) + " expected 2")
+
+    stack_1 = 0
+    stack_2 = 0
+    target_stack = 0
+    try:
+        stack_1 = int(args[0])
+        if not stacks.bool_stack_exists(stack_1) or stacks.stack_length(stack_1) == 0:
+            eH.ThrowError("Trying to read a rand min value from an empty stack (", stack_1, ")")
+        if not stacks.get_stack_val_force_type(stack_1, float):
+            eH.ThrowError("Trying to read a non-number for rand min from stack ", stack_1)
+    except ValueError:
+        eH.ThrowError("Incorrect type for argument 1 of rnd, expected int")
+
+    try:
+        stack_2 = int(args[1])
+        if not stacks.bool_stack_exists(stack_2) or stacks.stack_length(stack_2) == 0:
+            eH.ThrowError("Trying to read a rand max value from an empty stack (", stack_2, ")")
+        if not stacks.get_stack_val_force_type(stack_2, float):
+            eH.ThrowError("Trying to read a non-number for rand max from stack ", stack_2)
+    except ValueError:
+        eH.ThrowError("Incorrect type for argument 2 of rnd, expected int")
+
+    try:
+        target_stack = int(args[2])
+        stacks.push_stack(target_stack, 1)
+    except ValueError:
+        eH.ThrowError("Incorrect type for argument 3 of rnd, expected int")
+
+    return EncodeUInt32(stack_1) + EncodeUInt32(stack_2) + EncodeUInt32(target_stack)
+
+def encode_and(args):
+    if len(args) != 3:
+        eH.ThrowError("Incorrect number of arguments for and, found " + str(len(args)) + " expected 2")
+
+    stack_1 = 0
+    stack_2 = 0
+    target_stack = 0
+    try:
+        stack_1 = int(args[0])
+        if not stacks.bool_stack_exists(stack_1) or stacks.stack_length(stack_1) == 0:
+            eH.ThrowError("Trying to read a boolean value from an empty stack (", stack_1, ")")
+    except ValueError:
+        eH.ThrowError("Incorrect type for argument 1 of and, expected int")
+
+    try:
+        stack_2 = int(args[1])
+        if not stacks.bool_stack_exists(stack_2) or stacks.stack_length(stack_2) == 0:
+            eH.ThrowError("Trying to read a boolean value from an empty stack (", stack_1, ")")
+    except ValueError:
+        eH.ThrowError("Incorrect type for argument 2 of and, expected int")
+
+    try:
+        target_stack = int(args[2])
+        stacks.push_stack(target_stack, 1)
+    except ValueError:
+        eH.ThrowError("Incorrect type for argument 3 of and, expected int")
+
+    return EncodeUInt32(stack_1) + EncodeUInt32(stack_2) + EncodeUInt32(target_stack)
+
+def encode_or(args):
+    if len(args) != 3:
+        eH.ThrowError("Incorrect number of arguments for bor, found " + str(len(args)) + " expected 2")
+
+    stack_1 = 0
+    stack_2 = 0
+    target_stack = 0
+    try:
+        stack_1 = int(args[0])
+        if not stacks.bool_stack_exists(stack_1) or stacks.stack_length(stack_1) == 0:
+            eH.ThrowError("Trying to read a boolean value from an empty stack (", stack_1, ")")
+    except ValueError:
+        eH.ThrowError("Incorrect type for argument 1 of bor, expected int")
+
+    try:
+        stack_2 = int(args[1])
+        if not stacks.bool_stack_exists(stack_2) or stacks.stack_length(stack_2) == 0:
+            eH.ThrowError("Trying to read a boolean value from an empty stack (", stack_1, ")")
+    except ValueError:
+        eH.ThrowError("Incorrect type for argument 2 of bor, expected int")
+
+    try:
+        target_stack = int(args[2])
+        stacks.push_stack(target_stack, 1)
+    except ValueError:
+        eH.ThrowError("Incorrect type for argument 3 of bor, expected int")
+
+    return EncodeUInt32(stack_1) + EncodeUInt32(stack_2) + EncodeUInt32(target_stack)
+
+def encode_comment(args):
+    return b""
+
 ENCODING_FUNCTIONS = {
     "c": encode_clear,
     "psh": encode_push,
@@ -524,13 +623,17 @@ ENCODING_FUNCTIONS = {
     "nin": encode_input_number,
     "nin_alt": encode_input_number_prompt,
     "mrk": encode_mark,
-    "slp": encode_sleep
+    "slp": encode_sleep,
+    "rnd": encode_rand,
+    "and": encode_and,
+    "bor": encode_or,
+    "|": encode_comment
 }
 
 def encode_line(line):
     command = line.split(" ")
 
-    if not command[0] in SIGNIFIER_BYTES and command[0] != "mrk":
+    if not command[0] in SIGNIFIER_BYTES:
         eH.ThrowError("Incorrect Command")
 
     c = command[0]
@@ -542,8 +645,10 @@ def encode_line(line):
             c = "nin_alt"
     body_bytes = ENCODING_FUNCTIONS[c](command[1:])
 
-    if command[0] != "mrk":
-        sig_byte = EncodeUInt8(SIGNIFIER_BYTES[c])
+    sig = SIGNIFIER_BYTES[c]
+
+    if sig > 0:
+        sig_byte = EncodeUInt8(sig)
         return sig_byte + body_bytes
     else:
         return b""
@@ -573,7 +678,7 @@ with open(input_file, "r", encoding="utf-8") as r:
 
         if command[0] == "mrk":
             if len(command) == 2:
-                mark_locations[command[1]] = 0
+                mark_locations[int(command[1])] = 0
             else:
                 eH.ThrowError("Incorrect number of arguments for mrk, found ", len(command - 1), "expected 1")
 
