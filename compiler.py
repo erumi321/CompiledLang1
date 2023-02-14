@@ -74,7 +74,10 @@ def encode_push(args):
     try:
         i = int(args[len(args) - 1])
         stack_bytes = EncodeUInt32(i)
-        stacks.push_stack(i, value)
+        try:
+            stacks.push_stack(i, float(value))
+        except ValueError:
+            stacks.push_stack(i, value)
     except ValueError:
         eH.ThrowError("Incorrect type for final argument (stack number) of psh, expected int")  
     return value_bytes + stack_bytes
@@ -426,7 +429,7 @@ def encode_not(args):
         stack_1 = int(args[0])
         if not stacks.bool_stack_exists(stack_1) or stacks.stack_length(stack_1) == 0:
             eH.ThrowError("Trying to perform a not operation on empty stack (", stack_1, ")")
-        if not stacks.get_stack_val_force_type(stack_1, float):
+        if stacks.get_stack_val_force_type(stack_1, float) == ValueError:
             eH.ThrowError("Trying to perform not operation on a non-number value on stack ", stack_1)
     except ValueError:
         eH.ThrowError("Incorrect type for argument 1 of not, expected int")
@@ -498,7 +501,7 @@ def encode_sleep(args):
         stack_1 = int(args[0])
         if not stacks.bool_stack_exists(stack_1) or stacks.stack_length(stack_1) == 0:
             eH.ThrowError("Trying to read a sleep value from an empty stack (", stack_1, ")")
-        if not stacks.get_stack_val_force_type(stack_1, float):
+        if stacks.get_stack_val_force_type(stack_1, float) == ValueError:
             eH.ThrowError("Trying to read a non-number for sleep from stack ", stack_1)
     except ValueError:
         eH.ThrowError("Incorrect type for argument 1 of slp, expected int")
@@ -516,7 +519,7 @@ def encode_rand(args):
         stack_1 = int(args[0])
         if not stacks.bool_stack_exists(stack_1) or stacks.stack_length(stack_1) == 0:
             eH.ThrowError("Trying to read a rand min value from an empty stack (", stack_1, ")")
-        if not stacks.get_stack_val_force_type(stack_1, float):
+        if stacks.get_stack_val_force_type(stack_1, float) == ValueError:
             eH.ThrowError("Trying to read a non-number for rand min from stack ", stack_1)
     except ValueError:
         eH.ThrowError("Incorrect type for argument 1 of rnd, expected int")
@@ -525,7 +528,7 @@ def encode_rand(args):
         stack_2 = int(args[1])
         if not stacks.bool_stack_exists(stack_2) or stacks.stack_length(stack_2) == 0:
             eH.ThrowError("Trying to read a rand max value from an empty stack (", stack_2, ")")
-        if not stacks.get_stack_val_force_type(stack_2, float):
+        if stacks.get_stack_val_force_type(stack_2, float) == ValueError:
             eH.ThrowError("Trying to read a non-number for rand max from stack ", stack_2)
     except ValueError:
         eH.ThrowError("Incorrect type for argument 2 of rnd, expected int")

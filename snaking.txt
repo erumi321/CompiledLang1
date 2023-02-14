@@ -44,7 +44,7 @@ jmp 50 2
 mlt 2 3 2
 mrk 2
 
-| i = i + 1
+| i++
 inc 10
 
 | repeat while i < l
